@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>860</width>
+    <height>603</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>EasyPkg</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow, QWidget#centralwidget {
+    background-color: #0a0a0f;
+    color: #e4e4e9;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QFrame" name="SidebarFrame">
+        <property name="styleSheet">
+         <string notr="true">QFrame#sidebar_frame {
+    background-color: #111118;
+    border-right: 1px solid #1e1e28;
+}</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Shape::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Shadow::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <layout class="QVBoxLayout" name="SidebarLayout" stretch="0,6,1,1">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="ManagersLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QLabel {
+    background-color: #111118;
+    color: #7c3aed;               /* Фиолетовый акцент для заголовка */
+    border: 1px solid #1e1e28;    /* Граница как у кнопок/списка */
+    border-radius: 6px;
+    padding: 8px 12px;
+    qproperty-alignment: 'AlignCenter';  /* Центрирование текста */
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 6px;           /* Отступ от списка ниже */
+}</string>
+             </property>
+             <property name="text">
+              <string>Пакетные менеджеры:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListWidget" name="ManagersListWidget">
+             <property name="styleSheet">
+              <string notr="true">QListWidget{
+background-color: #111118;
+    color: #e4e4e9;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 8px 12px;
+    selection-background-color: #7c3aed;
+}
+
+QListWidget::item {
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+QListWidget::item:hover {
+    background-color: #1a1a24;
+}
+QListWidget::item:selected {
+    background-color: #7c3aed;
+    color: #ffffff;
+}</string>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="SidebarverticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="InstalledButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton{
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 0 12px;
+    color: #6b6b7a;
+}
+QPushButton:hover {
+    color: #7c3aed;
+    border-color: #7c3aed;
+}</string>
+             </property>
+             <property name="text">
+              <string>Скачанные пакеты</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="InstallersLayout" stretch="0,1">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QFrame" name="SearchbarFrame">
+          <property name="styleSheet">
+           <string notr="true">QFrame#sidebar_frame {
+    background-color: #111118;
+    border-right: 1px solid #1e1e28;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <layout class="QHBoxLayout" name="SearchbarLayout" stretch="0,0">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="SearchbarLineEdit">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QLineEdit{
+    background-color: #111118;
+    color: #e4e4e9;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 8px 12px;
+    selection-background-color: #7c3aed;
+}
+QLineEdit:focus {
+    border-color: #7c3aed;
+    background-color: #14141d;
+}
+QLineEdit:placeholder {
+    color: #6b6b7a;
+}</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SearchButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 0 12px;
+    color: #6b6b7a;
+}
+QPushButton:hover {
+    color: #7c3aed;
+    border-color: #7c3aed;
+}</string>
+               </property>
+               <property name="text">
+                <string>Поиск</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="PkgsFrame">
+          <property name="styleSheet">
+           <string notr="true">QFrame#PkgsFrame {
+    background-color: #0a0a0f;    /* Как у centralwidget */
+    border: 1px solid #1e1e28;    /* Тонкая граница */
+    border-radius: 8px;           /* Чуть больше скругление */
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="PkgsLayout"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>860</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+  </widget>
+  <action name="actionSettigns">
+   <property name="text">
+    <string>Settigns</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
