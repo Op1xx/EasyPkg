@@ -12,7 +12,7 @@ QFrame#SidebarFrame {
 }
 
 /* заголовок */
-QLabel#managers_header {
+QLabel#ManagersLabel {
     color: #7c3aed;
     qproperty-alignment: 'AlignCenter';
     font-weight: bold;
