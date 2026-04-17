@@ -1,0 +1,82 @@
+/* фон окна */
+QMainWindow#MainWindow, QWidget#centralwidget {
+    background-color: #0a0a0f;
+    color: #e4e4e9;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* левая колонка */
+QFrame#SidebarFrame {
+    background-color: #111118;
+    border-right: 1px solid #1e1e28;
+}
+
+/* заголовок */
+QLabel#managers_header {
+    color: #7c3aed;
+    qproperty-alignment: 'AlignCenter';
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* список в сайдбаре */
+QListWidget#ManagersListWidget {
+    background-color: transparent;
+    border: none;
+}
+QListWidget#ManagersListWidget::item {
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 6px;
+}
+QListWidget#ManagersListWidget::item:hover {
+    background-color: #1a1a24;
+}
+QListWidget#ManagersListWidget::item:selected {
+    background-color: #7c3aed; /* Фиолетовый при клике */
+    color: white;
+}
+
+/* кнопка установленные */
+QPushButton#InstalledButton {
+    background-color: #16161f;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 8px;
+}
+QPushButton#InstalledButton:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+}
+
+/* поле поиска */
+QLineEdit#SearchbarLineEdit {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 6px;
+}
+QLineEdit#SearchbarLineEdit:focus {
+    border-color: #7c3aed; /* Подсветка при вводе */
+}
+
+/* кнопка поиска */
+QPushButton#SearchButton {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    margin-left: 4px;
+}
+QPushButton#SearchButton:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+}
+
+/* рамка для пакетов */
+QFrame#PkgsFrame {
+    background-color: #0a0a0f;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+    margin: 8px;
+}
