@@ -1,0 +1,294 @@
+/* EasyPkg Global Stylesheet (QSS)
+ * Цветовая схема:
+ *   Фон главный:      #0a0a0f
+ *   Панели:           #111118
+ *   Карточки пакетов: #16161f
+ *   Текст:            #e4e4e9
+ *   Акцент (hover/focus): #7c3aed
+ *   Неактивный текст: #6b6b7a
+ *   Границы:          #1e1e28
+ */
+
+/* === Глобальные стили для всего приложения === */
+* {
+    font-family: "Segoe UI", "Roboto", "Ubuntu", sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background-color: #0a0a0f;
+    color: #e4e4e9;
+}
+
+/* === SidebarFrame === */
+QFrame#SidebarFrame {
+    background-color: #111118;
+    border-right: 1px solid #1e1e28;
+}
+
+/* === Менюбар и статусбар === */
+QMenuBar {
+    background-color: #111118;
+    color: #e4e4e9;
+    border-bottom: 1px solid #1e1e28;
+    padding: 4px;
+}
+
+QMenuBar::item:selected {
+    background-color: #7c3aed;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+QMenu {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+QMenu::item:selected {
+    background-color: #7c3aed;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+QStatusBar {
+    background-color: #111118;
+    color: #6b6b7a;
+    border-top: 1px solid #1e1e28;
+    padding: 4px;
+}
+
+/* === ManagersListWidget === */
+QListWidget#ManagersListWidget {
+    background-color: #111118;
+    color: #e4e4e9;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 8px 12px;
+    selection-background-color: #7c3aed;
+    outline: none;
+}
+
+QListWidget#ManagersListWidget::item {
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin: 2px 0;
+}
+
+QListWidget#ManagersListWidget::item:hover {
+    background-color: #1a1a24;
+}
+
+QListWidget#ManagersListWidget::item:selected {
+    background-color: #7c3aed;
+    color: #ffffff;
+}
+
+/* === InstalledButton === */
+QPushButton#InstalledButton {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 10px 16px;
+    color: #6b6b7a;
+    font-weight: 600;
+}
+
+QPushButton#InstalledButton:hover {
+    color: #7c3aed;
+    border-color: #7c3aed;
+    background-color: #1a1a24;
+}
+
+QPushButton#InstalledButton:pressed {
+    background-color: #7c3aed;
+    color: #ffffff;
+}
+
+/* === SearchbarFrame === */
+QFrame#SearchbarFrame {
+    background-color: #111118;
+    border-bottom: 1px solid #1e1e28;
+    padding: 10px;
+}
+
+/* === SearchbarLineEdit === */
+QLineEdit#SearchbarLineEdit {
+    background-color: #111118;
+    color: #e4e4e9;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 10px 14px;
+    selection-background-color: #7c3aed;
+    min-height: 45px;
+}
+
+QLineEdit#SearchbarLineEdit:focus {
+    border-color: #7c3aed;
+    background-color: #14141d;
+}
+
+QLineEdit#SearchbarLineEdit:placeholder {
+    color: #6b6b7a;
+}
+
+/* === SearchButton === */
+QPushButton#SearchButton {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 10px 20px;
+    color: #6b6b7a;
+    font-weight: 600;
+    min-height: 45px;
+}
+
+QPushButton#SearchButton:hover {
+    color: #7c3aed;
+    border-color: #7c3aed;
+    background-color: #1a1a24;
+}
+
+QPushButton#SearchButton:pressed {
+    background-color: #7c3aed;
+    color: #ffffff;
+}
+
+/* === PkgsFrame === */
+QFrame#PkgsFrame {
+    background-color: #0a0a0f;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+    margin: 10px;
+}
+
+/* === PkgsLayout (контейнер для карточек) === */
+QWidget#PkgsLayout {
+    background-color: #0a0a0f;
+}
+
+/* === PackageCard (кастомный виджет карточки пакета) === */
+QFrame.PackageCard {
+    background-color: #16161f;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+QFrame.PackageCard:hover {
+    border-color: #7c3aed;
+    background-color: #1a1a28;
+}
+
+/* Элементы внутри карточки */
+QLabel.PackageCardName {
+    color: #e4e4e9;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 4px 0;
+}
+
+QLabel.PackageCardDesc {
+    color: #a0a0b0;
+    font-size: 12px;
+    padding: 4px 0;
+}
+
+QLabel.PackageCardVersion {
+    color: #6b6b7a;
+    font-size: 11px;
+    padding: 4px 0;
+}
+
+/* Кнопка установки в карточке */
+QPushButton.PackageCardInstallBtn {
+    background-color: #1e1e28;
+    border: 1px solid #7c3aed;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+QPushButton.PackageCardInstallBtn:hover {
+    background-color: #7c3aed;
+    color: #ffffff;
+}
+
+QPushButton.PackageCardInstallBtn:pressed {
+    background-color: #5b21b6;
+    border-color: #5b21b6;
+}
+
+QPushButton.PackageCardInstallBtn:disabled {
+    background-color: #111118;
+    border-color: #1e1e28;
+    color: #6b6b7a;
+}
+
+/* === ScrollArea для списка пакетов === */
+QScrollArea {
+    background-color: #0a0a0f;
+    border: none;
+}
+
+QScrollArea QWidget {
+    background-color: #0a0a0f;
+}
+
+/* === Полосы прокрутки === */
+QScrollBar:vertical {
+    background-color: #111118;
+    width: 10px;
+    border-radius: 5px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #1e1e28;
+    border-radius: 5px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #7c3aed;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+QScrollBar:horizontal {
+    background-color: #111118;
+    height: 10px;
+    border-radius: 5px;
+    margin: 0;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #1e1e28;
+    border-radius: 5px;
+    min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #7c3aed;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* === ManagersLabel (заголовок sidebar) === */
+QLabel#ManagersLabel {
+    background-color: #111118;
+    color: #7c3aed;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    qproperty-alignment: AlignCenter;
+}
