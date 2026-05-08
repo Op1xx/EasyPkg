@@ -80,3 +80,113 @@ QFrame#PkgsFrame {
     border-radius: 8px;
     margin: 8px;
 }
+
+/* скролл-область */
+QScrollArea#PkgsScrollArea,
+QWidget#PkgsContainer {
+    background-color: transparent;
+    border: none;
+}
+QScrollBar:vertical {
+    background-color: #111118;
+    width: 6px;
+    border-radius: 3px;
+}
+QScrollBar::handle:vertical {
+    background-color: #2d2d3a;
+    border-radius: 3px;
+    min-height: 20px;
+}
+QScrollBar::handle:vertical:hover {
+    background-color: #7c3aed;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+/* карточка пакета */
+QFrame#package_card {
+    background-color: #111118;
+    border: 1px solid #1e1e28;
+    border-radius: 8px;
+}
+QFrame#package_card:hover {
+    border-color: #2d2d3a;
+}
+
+/* название пакета */
+QLabel#pkg_name {
+    color: #e4e4e9;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* версия */
+QLabel#pkg_version {
+    color: #4b4b5a;
+    font-size: 11px;
+}
+
+/* описание */
+QLabel#pkg_desc {
+    color: #9090a0;
+    font-size: 11px;
+}
+
+/* бейдж "установлен" */
+QLabel#InstalledBadge {
+    color: #34d399;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* кнопка установки */
+QPushButton#install_btn {
+    background-color: #7c3aed;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QPushButton#install_btn:hover {
+    background-color: #6d28d9;
+}
+QPushButton#install_btn:disabled {
+    background-color: #2d2d3a;
+    color: #4b4b5a;
+}
+
+/* статусное сообщение */
+QLabel#StatusLabel {
+    color: #4b4b5a;
+    font-size: 13px;
+}
+
+/* диалог установки */
+QDialog {
+    background-color: #0a0a0f;
+    color: #e4e4e9;
+}
+QTextEdit#install_output {
+    background-color: #0d0d14;
+    color: #34d399;
+    border: 1px solid #1e1e28;
+    border-radius: 6px;
+    font-family: "Monospace", monospace;
+    font-size: 12px;
+    padding: 8px;
+}
+QPushButton#install_btn_close {
+    background-color: #1e1e28;
+    color: #e4e4e9;
+    border: 1px solid #2d2d3a;
+    border-radius: 5px;
+    padding: 5px 18px;
+}
+QPushButton#install_btn_close:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+}
