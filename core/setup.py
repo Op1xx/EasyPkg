@@ -1,28 +1,20 @@
 import base64
 import getpass
-import grp
 import os
 
 GROUP = "easypkg"
 SUDOERS_PATH = "/etc/sudoers.d/easypkg"
 
-# Разрешаем только конкретные бинарники пакетных менеджеров
-_SUDOERS_CONTENT = (
-    "# EasyPkg — установка пакетов без пароля для группы easypkg\n"
-    "%easypkg ALL=(ALL) NOPASSWD: "
-    "/usr/bin/pacman, /usr/bin/apt, /usr/bin/apt-get, "
-    "/usr/bin/dnf, /bin/dnf\n"
-)
-
 
 def setup_done() -> bool:
-    return os.path.exists(SUDOERS_PATH)
-
-
-def user_in_group() -> bool:
+    """Проверяет что файл существует и содержит правило для конкретного пользователя."""
+    if not os.path.exists(SUDOERS_PATH):
+        return False
     try:
-        return getpass.getuser() in grp.getgrnam(GROUP).gr_mem
-    except KeyError:
+        content = open(SUDOERS_PATH).read()
+        # Старое правило было для группы (%easypkg), новое — для пользователя
+        return f"{getpass.getuser()} ALL=" in content
+    except OSError:
         return False
 
 
@@ -31,12 +23,20 @@ def needs_wizard() -> bool:
 
 
 def needs_password() -> bool:
-    return not (setup_done() and user_in_group())
+    # Правило пишется на конкретного пользователя — достаточно проверить файл
+    return not setup_done()
 
 
 def get_setup_cmd(username: str) -> list[str]:
-    # base64 чтобы избежать проблем с экранированием в shell
-    content_b64 = base64.b64encode(_SUDOERS_CONTENT.encode()).decode()
+    # Правило на username, а не на группу: работает сразу без re-login
+    content = (
+        f"# EasyPkg — установка пакетов без пароля для {username}\n"
+        f"{username} ALL=(ALL) NOPASSWD: "
+        "/usr/bin/pacman, /usr/bin/apt, /usr/bin/apt-get, "
+        "/usr/bin/dnf, /bin/dnf\n"
+    )
+    content_b64 = base64.b64encode(content.encode()).decode()
+    # Группу всё равно создаём — для порядка
     script = (
         f"groupadd -f {GROUP} && "
         f"usermod -aG {GROUP} {username} && "
