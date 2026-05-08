@@ -9,7 +9,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.uic import loadUi
 
 from core.distro_detector import get_distro_info
-from core.pkg_manager import Package, get_install_cmd, get_remove_cmd, list_installed, search_packages
+from core.pkg_manager import Package, get_install_cmd, get_installed_names, get_remove_cmd, list_installed, search_packages
 from core.command_runner import InstallWorker
 from core.setup import get_setup_cmd, needs_password, needs_wizard
 

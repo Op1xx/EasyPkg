@@ -151,6 +151,15 @@ def list_installed(manager: str) -> list[Package]:
     return pkgs
 
 
+def get_installed_names(manager: str) -> set[str]:
+    """Возвращает множество имён установленных пакетов."""
+    cfg = _MANAGERS.get(manager)
+    if not cfg:
+        return set()
+    output, _ = run_sync(cfg["list_installed"], timeout=30)
+    return {p.name for p in cfg["parse_installed"](output)}
+
+
 def get_install_cmd(manager: str, package: str) -> list[str]:
     cfg = _MANAGERS.get(manager)
     if not cfg:
