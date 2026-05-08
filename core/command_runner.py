@@ -25,7 +25,7 @@ try:
         line_received = _signal(str)
         finished = _signal(bool)
 
-        def __init__(self, cmd: list[str], password: str, parent=None):
+        def __init__(self, cmd: list[str], password: str | None, parent=None):
             super().__init__(parent)
             self.cmd = cmd
             self.password = password
@@ -34,17 +34,27 @@ try:
             env = os.environ.copy()
             env["DEBIAN_FRONTEND"] = "noninteractive"
             try:
+                if self.password is not None:
+                    full_cmd = ["sudo", "-S"] + self.cmd
+                    stdin_mode = subprocess.PIPE
+                else:
+                    # NOPASSWD — sudo без ввода пароля
+                    full_cmd = ["sudo"] + self.cmd
+                    stdin_mode = subprocess.DEVNULL
+
                 proc = subprocess.Popen(
-                    ["sudo", "-S"] + self.cmd,
-                    stdin=subprocess.PIPE,
+                    full_cmd,
+                    stdin=stdin_mode,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
                     env=env,
                 )
-                proc.stdin.write(self.password + "\n")
-                proc.stdin.flush()
-                proc.stdin.close()
+
+                if self.password is not None:
+                    proc.stdin.write(self.password + "\n")
+                    proc.stdin.flush()
+                    proc.stdin.close()
 
                 for line in iter(proc.stdout.readline, ""):
                     stripped = line.rstrip()

@@ -159,10 +159,61 @@ QPushButton#install_btn:disabled {
     color: #4b4b5a;
 }
 
+/* кнопка удаления */
+QPushButton#remove_btn {
+    background-color: transparent;
+    color: #f87171;
+    border: 1px solid #3d1f1f;
+    border-radius: 5px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QPushButton#remove_btn:hover {
+    background-color: #3d1f1f;
+    border-color: #f87171;
+}
+
+/* заголовок секции */
+QLabel#SectionHeader {
+    color: #4b4b5a;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 2px 8px 2px;
+}
+
 /* статусное сообщение */
 QLabel#StatusLabel {
     color: #4b4b5a;
     font-size: 13px;
+}
+
+/* визард */
+QDialog#SetupWizard {
+    background-color: #0a0a0f;
+}
+QLabel#WizardTitle {
+    color: #e4e4e9;
+    font-size: 16px;
+    font-weight: 700;
+}
+QLabel#WizardDesc {
+    color: #9090a0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+QPushButton#WizardSkipBtn {
+    background-color: transparent;
+    color: #4b4b5a;
+    border: 1px solid #1e1e28;
+    border-radius: 5px;
+    padding: 5px 14px;
+}
+QPushButton#WizardSkipBtn:hover {
+    color: #9090a0;
+    border-color: #2d2d3a;
 }
 
 /* диалог установки */
