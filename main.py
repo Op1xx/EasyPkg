@@ -1,3 +1,4 @@
+import getpass
 import sys
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QFrame, QHBoxLayout, QInputDialog, QLabel,
@@ -8,8 +9,9 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.uic import loadUi
 
 from core.distro_detector import get_distro_info
-from core.pkg_manager import Package, get_install_cmd, list_installed, search_packages
+from core.pkg_manager import Package, get_install_cmd, get_remove_cmd, list_installed, search_packages
 from core.command_runner import InstallWorker
+from core.setup import get_setup_cmd, needs_password, needs_wizard
 
 
 DISTRO_MANAGERS: dict[str, str] = {
@@ -20,6 +22,49 @@ DISTRO_MANAGERS: dict[str, str] = {
     "РЕД ОС":              "dnf",
     "ALT Linux / МОС":     "apt",
 }
+
+_POPULAR: dict[str, list[tuple[str, str]]] = {
+    "pacman": [
+        ("firefox",        "Браузер Firefox"),
+        ("git",            "Система контроля версий"),
+        ("neovim",         "Текстовый редактор на базе Vim"),
+        ("htop",           "Интерактивный монитор процессов"),
+        ("vlc",            "Медиаплеер"),
+        ("docker",         "Контейнеризация приложений"),
+        ("python",         "Язык программирования Python 3"),
+        ("nodejs",         "Среда выполнения JavaScript"),
+        ("ffmpeg",         "Обработка видео и аудио"),
+        ("obs-studio",     "Запись экрана и стриминг"),
+    ],
+    "apt": [
+        ("firefox",        "Браузер Firefox"),
+        ("git",            "Система контроля версий"),
+        ("neovim",         "Текстовый редактор на базе Vim"),
+        ("htop",           "Интерактивный монитор процессов"),
+        ("vlc",            "Медиаплеер"),
+        ("docker.io",      "Контейнеризация приложений"),
+        ("python3",        "Язык программирования Python 3"),
+        ("nodejs",         "Среда выполнения JavaScript"),
+        ("ffmpeg",         "Обработка видео и аудио"),
+        ("obs-studio",     "Запись экрана и стриминг"),
+    ],
+    "dnf": [
+        ("firefox",        "Браузер Firefox"),
+        ("git",            "Система контроля версий"),
+        ("neovim",         "Текстовый редактор на базе Vim"),
+        ("htop",           "Интерактивный монитор процессов"),
+        ("vlc",            "Медиаплеер"),
+        ("docker",         "Контейнеризация приложений"),
+        ("python3",        "Язык программирования Python 3"),
+        ("nodejs",         "Среда выполнения JavaScript"),
+        ("ffmpeg",         "Обработка видео и аудио"),
+        ("obs-studio",     "Запись экрана и стриминг"),
+    ],
+}
+
+
+def popular_packages(manager: str) -> list[Package]:
+    return [Package(name=n, description=d) for n, d in _POPULAR.get(manager, [])]
 
 
 class SearchWorker(QThread):
@@ -53,10 +98,99 @@ class InstalledWorker(QThread):
             self.error.emit(str(e))
 
 
-class InstallDialog(QDialog):
-    def __init__(self, package: str, manager: str, password: str, parent=None):
+class SetupWizard(QDialog):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"Установка: {package}")
+        self.setWindowTitle("Настройка EasyPkg")
+        self.setMinimumWidth(460)
+        self.setObjectName("SetupWizard")
+        self.worker = None
+        self._build_ui()
+
+    def _build_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(24, 24, 24, 24)
+
+        title = QLabel("Первый запуск")
+        title.setObjectName("WizardTitle")
+        layout.addWidget(title)
+
+        user = getpass.getuser()
+        desc = QLabel(
+            "EasyPkg создаст группу <b>easypkg</b> и настроит sudo, "
+            "чтобы участники группы могли устанавливать и удалять пакеты "
+            "без ввода пароля.<br><br>"
+            "Будет выполнено:<br>"
+            "&nbsp;&nbsp;• <code>groupadd easypkg</code><br>"
+            f"&nbsp;&nbsp;• <code>usermod -aG easypkg {user}</code><br>"
+            "&nbsp;&nbsp;• <code>/etc/sudoers.d/easypkg</code> — NOPASSWD для менеджеров пакетов"
+        )
+        desc.setObjectName("WizardDesc")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        self.password_field = QLineEdit()
+        self.password_field.setPlaceholderText("Пароль sudo...")
+        self.password_field.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_field.setObjectName("SearchbarLineEdit")
+        layout.addWidget(self.password_field)
+
+        self.output = QTextEdit()
+        self.output.setReadOnly(True)
+        self.output.setObjectName("install_output")
+        self.output.setMaximumHeight(110)
+        self.output.hide()
+        layout.addWidget(self.output)
+
+        btns = QHBoxLayout()
+        self.skip_btn = QPushButton("Пропустить")
+        self.skip_btn.setObjectName("WizardSkipBtn")
+        self.skip_btn.clicked.connect(self.reject)
+
+        self.setup_btn = QPushButton("Настроить →")
+        self.setup_btn.setObjectName("install_btn")
+        self.setup_btn.clicked.connect(self._run_setup)
+        self.password_field.returnPressed.connect(self._run_setup)
+
+        btns.addWidget(self.skip_btn)
+        btns.addStretch()
+        btns.addWidget(self.setup_btn)
+        layout.addLayout(btns)
+
+    def _run_setup(self):
+        password = self.password_field.text()
+        if not password:
+            return
+
+        self.password_field.hide()
+        self.output.show()
+        self.setup_btn.setEnabled(False)
+        self.skip_btn.setEnabled(False)
+
+        self.worker = InstallWorker(get_setup_cmd(getpass.getuser()), password, self)
+        self.worker.line_received.connect(self.output.append)
+        self.worker.finished.connect(self._on_done)
+        self.worker.start()
+
+    def _on_done(self, success: bool):
+        if success:
+            self.output.append("\n✅ Готово. Пароль больше не потребуется.")
+            self.skip_btn.setText("Закрыть")
+            self.skip_btn.clicked.disconnect()
+            self.skip_btn.clicked.connect(self.accept)
+        else:
+            self.output.append("\n❌ Ошибка. Проверьте пароль.")
+            self.password_field.show()
+            self.setup_btn.setEnabled(True)
+        self.skip_btn.setEnabled(True)
+
+
+class SudoDialog(QDialog):
+    """Диалог выполнения команды с sudo и стримингом вывода."""
+    def __init__(self, title: str, cmd: list[str], password: str, success_msg: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
         self.setMinimumSize(540, 380)
         self.worker = None
 
@@ -73,12 +207,7 @@ class InstallDialog(QDialog):
         self.close_btn.clicked.connect(self.accept)
         layout.addWidget(self.close_btn, alignment=Qt.AlignmentFlag.AlignRight)
 
-        cmd = get_install_cmd(manager, package)
-        if not cmd:
-            self.output.append(f"Неизвестный менеджер пакетов: {manager}")
-            self.close_btn.setEnabled(True)
-            return
-
+        self._success_msg = success_msg
         self.output.append(f"$ sudo {' '.join(cmd)}\n")
         self.worker = InstallWorker(cmd, password, self)
         self.worker.line_received.connect(self.output.append)
@@ -86,7 +215,7 @@ class InstallDialog(QDialog):
         self.worker.start()
 
     def _on_done(self, success: bool):
-        self.output.append("\n✅ Установка завершена" if success else "\n❌ Ошибка установки")
+        self.output.append(f"\n{self._success_msg}" if success else "\n❌ Ошибка")
         self.close_btn.setEnabled(True)
 
 
@@ -176,6 +305,10 @@ def main():
             badge = QLabel("Установлен")
             badge.setObjectName("InstalledBadge")
             bottom.addWidget(badge)
+            btn_remove = QPushButton("Удалить")
+            btn_remove.setObjectName("remove_btn")
+            btn_remove.clicked.connect(lambda checked=False, p=pkg: do_remove(p.name))
+            bottom.addWidget(btn_remove)
         else:
             btn = QPushButton("Установить")
             btn.setObjectName("install_btn")
@@ -186,51 +319,74 @@ def main():
         card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         return card
 
-    def show_packages(packages: list[Package]):
+    def show_packages(packages: list[Package], header: str = ""):
         clear_cards()
         if not packages:
             show_status("Ничего не найдено")
             return
+        offset = 0
+        if header:
+            lbl = QLabel(header)
+            lbl.setObjectName("SectionHeader")
+            pkg_layout.insertWidget(0, lbl)
+            offset = 1
         for i, pkg in enumerate(packages):
-            pkg_layout.insertWidget(i, make_card(pkg))
+            pkg_layout.insertWidget(offset + i, make_card(pkg))
+
+    def show_popular():
+        show_packages(popular_packages(state["manager"]), header="Популярные пакеты")
+
+    def _get_password(prompt: str) -> tuple[str | None, bool]:
+        """Возвращает (пароль, ok). Если NOPASSWD настроен — (None, True)."""
+        if not needs_password():
+            return None, True
+        password, ok = QInputDialog.getText(
+            window, "Авторизация", prompt, QLineEdit.EchoMode.Password,
+        )
+        return (password, ok) if ok else (None, False)
 
     def do_install(package_name: str):
-        password, ok = QInputDialog.getText(
-            window,
-            "Авторизация",
-            f"Пароль sudo для установки '{package_name}':",
-            QLineEdit.EchoMode.Password,
-        )
+        password, ok = _get_password(f"Пароль sudo для установки '{package_name}':")
         if not ok:
             return
-        dlg = InstallDialog(package_name, state["manager"], password, window)
-        dlg.exec()
+        cmd = get_install_cmd(state["manager"], package_name)
+        SudoDialog(f"Установка: {package_name}", cmd, password, "✅ Установка завершена", window).exec()
+
+    def do_remove(package_name: str):
+        password, ok = _get_password(f"Пароль sudo для удаления '{package_name}':")
+        if not ok:
+            return
+        cmd = get_remove_cmd(state["manager"], package_name)
+        SudoDialog(f"Удаление: {package_name}", cmd, password, "✅ Удаление завершено", window).exec()
 
     def do_search():
         query = window.SearchbarLineEdit.text().strip()
         if not query:
+            show_popular()
             return
         show_status("Поиск...")
         _stop_worker()
         w = SearchWorker(state["manager"], query)
-        w.results_ready.connect(show_packages)
+        w.results_ready.connect(lambda pkgs: show_packages(pkgs, header=f"Результаты: {query}"))
         w.error.connect(lambda msg: show_status(f"Ошибка: {msg}"))
         w.start()
         state["worker"] = w
 
     def on_installed_click():
         window.ManagersListWidget.clearSelection()
-        show_status("Загрузка установленных пакетов...")
+        window.SearchbarLineEdit.clear()
+        show_status("Загрузка...")
         _stop_worker()
         w = InstalledWorker(state["manager"])
-        w.results_ready.connect(show_packages)
+        w.results_ready.connect(lambda pkgs: show_packages(pkgs, header="Установленные пакеты"))
         w.error.connect(lambda msg: show_status(f"Ошибка: {msg}"))
         w.start()
         state["worker"] = w
 
     def on_distro_click(item):
         state["manager"] = DISTRO_MANAGERS.get(item.text(), "apt")
-        show_status(f"Выбран: {item.text()}. Введите запрос для поиска.")
+        window.SearchbarLineEdit.clear()
+        show_popular()
 
     def _stop_worker():
         w = state.get("worker")
@@ -250,7 +406,10 @@ def main():
                 window.ManagersListWidget.setCurrentRow(i)
                 break
 
-    show_status("Введите запрос и нажмите Поиск")
+    show_popular()
+
+    if needs_wizard():
+        SetupWizard(window).exec()
 
     window.show()
     sys.exit(app.exec())

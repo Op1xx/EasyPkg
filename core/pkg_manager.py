@@ -105,6 +105,7 @@ _MANAGERS: dict[str, dict] = {
     "pacman": {
         "search":          lambda q: ["pacman", "-Ss", q],
         "install":         lambda p: ["pacman", "-S", "--noconfirm", p],
+        "remove":          lambda p: ["pacman", "-R", "--noconfirm", p],
         "list_installed":  ["pacman", "-Qq"],
         "parse_search":    _parse_pacman_search,
         "parse_installed": _parse_pacman_installed,
@@ -112,6 +113,7 @@ _MANAGERS: dict[str, dict] = {
     "apt": {
         "search":          lambda q: ["apt", "search", q],
         "install":         lambda p: ["apt", "install", "-y", p],
+        "remove":          lambda p: ["apt", "remove", "-y", p],
         "list_installed":  ["apt", "list", "--installed"],
         "parse_search":    _parse_apt_search,
         "parse_installed": _parse_apt_installed,
@@ -119,6 +121,7 @@ _MANAGERS: dict[str, dict] = {
     "dnf": {
         "search":          lambda q: ["dnf", "search", q],
         "install":         lambda p: ["dnf", "install", "-y", p],
+        "remove":          lambda p: ["dnf", "remove", "-y", p],
         "list_installed":  ["rpm", "-qa", "--queryformat", "%{NAME} %{VERSION}\n"],
         "parse_search":    _parse_dnf_search,
         "parse_installed": _parse_dnf_installed,
@@ -153,3 +156,10 @@ def get_install_cmd(manager: str, package: str) -> list[str]:
     if not cfg:
         return []
     return cfg["install"](package)
+
+
+def get_remove_cmd(manager: str, package: str) -> list[str]:
+    cfg = _MANAGERS.get(manager)
+    if not cfg:
+        return []
+    return cfg["remove"](package)
