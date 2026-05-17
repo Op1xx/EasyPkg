@@ -1,70 +1,35 @@
-import os
 import subprocess
 
 
-def run_sync(cmd: list[str], timeout: int = 30) -> tuple[str, int]:
+def run(cmd: list[str], timeout: int = 60) -> tuple[int, str, str]:
+    """Run a command and return (returncode, stdout, stderr)."""
     try:
         result = subprocess.run(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+            capture_output=True,
             text=True,
             timeout=timeout,
         )
-        return result.stdout, result.returncode
-    except FileNotFoundError:
-        return f"Команда не найдена: {cmd[0]}", 127
+        return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
-        return "Превышено время ожидания", 1
+        return 1, "", "Timeout expired"
+    except FileNotFoundError:
+        return 1, "", f"Command not found: {cmd[0]}"
 
 
-try:
-    from PyQt6.QtCore import QThread, pyqtSignal as _signal
-
-    class InstallWorker(QThread):
-        line_received = _signal(str)
-        finished = _signal(bool)
-
-        def __init__(self, cmd: list[str], password: str | None, parent=None):
-            super().__init__(parent)
-            self.cmd = cmd
-            self.password = password
-
-        def run(self):
-            env = os.environ.copy()
-            env["DEBIAN_FRONTEND"] = "noninteractive"
-            try:
-                if self.password is not None:
-                    full_cmd = ["sudo", "-S"] + self.cmd
-                    stdin_mode = subprocess.PIPE
-                else:
-                    # NOPASSWD — sudo без ввода пароля
-                    full_cmd = ["sudo"] + self.cmd
-                    stdin_mode = subprocess.DEVNULL
-
-                proc = subprocess.Popen(
-                    full_cmd,
-                    stdin=stdin_mode,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    env=env,
-                )
-
-                if self.password is not None:
-                    proc.stdin.write(self.password + "\n")
-                    proc.stdin.flush()
-                    proc.stdin.close()
-
-                for line in iter(proc.stdout.readline, ""):
-                    stripped = line.rstrip()
-                    if stripped:
-                        self.line_received.emit(stripped)
-                proc.wait()
-                self.finished.emit(proc.returncode == 0)
-            except Exception as e:
-                self.line_received.emit(f"Ошибка: {e}")
-                self.finished.emit(False)
-
-except ImportError:
-    pass
+def run_sudo(cmd: list[str], password: str, timeout: int = 60) -> tuple[int, str, str]:
+    """Run a command with sudo using the provided password via stdin."""
+    try:
+        full_cmd = ["sudo", "-S", "-p", ""] + cmd
+        result = subprocess.run(
+            full_cmd,
+            input=password + "\n",
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return result.returncode, result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        return 1, "", f"Timeout: команда выполнялась дольше {timeout} секунд"
+    except FileNotFoundError:
+        return 1, "", f"Команда не найдена: {cmd[0]}"
