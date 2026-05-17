@@ -166,8 +166,8 @@ def main():
         "Fedora (dnf)",
         "Debian / Ubuntu (apt)",
         "Astra Linux (SE)",
-        "РЕД ОС",
-        "ALT Linux / МОС",
+        "РЕД ОС / МОС (dnf)",
+        "ALT Linux (apt)",
     ]
     window.ManagersListWidget.addItems(distros)
 
