@@ -36,9 +36,22 @@ DISTRO_ITEM_MAP = {
     "mos": "ALT Linux / МОС",
 }
 
+SIDEBAR_MANAGER_MAP = {
+    "Arch Linux (pacman)": "pacman",
+    "Fedora (dnf)": "dnf",
+    "Debian / Ubuntu (apt)": "apt",
+    "Astra Linux (SE)": "apt",
+    "РЕД ОС": "dnf",
+    "ALT Linux / МОС": "apt-get",
+}
+
 _active_workers = []
 _installed_names: set[str] = set()
 _sudo_password: str | None = None
+_last_query: str = ""
+_system_manager: str | None = None
+_selected_manager: str | None = None
+_last_view: str = "search"
 
 _SPINNER = ["▰▱▱▱", "▱▰▱▱", "▱▱▰▱", "▱▱▱▰", "▱▱▰▱", "▱▰▱▱"]
 
@@ -139,6 +152,9 @@ def main():
     print(f"🐧 Система: {info['name']} | Менеджер: {info['manager']}")
 
     pkg = PackageManager.from_manager(info["manager"]) if info["manager"] else None
+    global _system_manager, _selected_manager
+    _system_manager = info["manager"]
+    _selected_manager = info["manager"]
 
     # ── Сайдбар ──
     window.ManagersLabel.setText("// ДИСТРИБУТИВ")
@@ -198,7 +214,22 @@ def main():
                 item.widget().deleteLater()
 
     def show_error(msg: str):
-        QMessageBox.critical(window, "Ошибка", msg)
+        dlg = QMessageBox(window)
+        dlg.setIcon(QMessageBox.Icon.Critical)
+        dlg.setWindowTitle("Ошибка")
+        dlg.setText(msg)
+        dlg.setStyleSheet("""
+            * { font-family: "JetBrains Mono","Courier New",monospace; border-radius: 0; }
+            QMessageBox { background: #0c0c0c; border: 3px solid #7c4dff; }
+            QLabel { color: #d0d0d0; font-size: 12px; padding: 16px; background: transparent; }
+            QPushButton {
+                background: #0e0b1a; border: 2px solid #2a1e3d;
+                padding: 8px 24px; color: #b0a0d0; font-size: 11px; font-weight: 800;
+                min-width: 80px; min-height: 20px;
+            }
+            QPushButton:hover { background: #7c4dff; border-color: #7c4dff; color: #fff; }
+        """)
+        dlg.exec()
 
     def _is_auth_error(msg: str) -> bool:
         keywords = ("incorrect password", "try again", "authentication failure",
@@ -282,9 +313,7 @@ def main():
                     reset_status()
                     if not sip.isdeleted(_b):
                         if success:
-                            _installed_names.discard(_n)
-                            _b.setText("УДАЛЁН")
-                            _b.setStyleSheet("color: #50fa7b; border-color: #50fa7b;")
+                            refresh_after_operation()
                         else:
                             if _is_auth_error(msg):
                                 _sudo_password = None
@@ -315,12 +344,7 @@ def main():
                     reset_status()
                     if not sip.isdeleted(_b):
                         if success:
-                            _installed_names.add(_n)
-                            _b.setText("УСТАНОВЛЕН")
-                            _b.setStyleSheet(
-                                "background: transparent; color: #50fa7b;"
-                                "border: 2px solid #50fa7b;"
-                            )
+                            refresh_after_operation()
                         else:
                             if _is_auth_error(msg):
                                 _sudo_password = None
@@ -357,6 +381,9 @@ def main():
         show_error(f"Ошибка поиска:\n{msg}")
 
     def do_search(query: str):
+        global _last_query, _last_view
+        _last_query = query
+        _last_view = "search"
         if not pkg:
             show_error("Пакетный менеджер не определён для этого дистрибутива.")
             return
@@ -381,11 +408,54 @@ def main():
 
     # ── Обработчики событий ──
 
+    def refresh_after_operation():
+        if not pkg:
+            return
+        cache_worker = InstalledWorker(pkg)
+        _active_workers.append(cache_worker)
+
+        def on_cache_ready(results: list, _w=cache_worker):
+            _installed_names.clear()
+            for r in results:
+                _installed_names.add(r["name"])
+            if _w in _active_workers:
+                _active_workers.remove(_w)
+            if _last_view == "search":
+                do_search(_last_query or "git")
+            else:
+                on_installed_click()
+
+        cache_worker.results_ready.connect(on_cache_ready)
+        cache_worker.start()
+
+    def select_system_distro():
+        for text, mgr in SIDEBAR_MANAGER_MAP.items():
+            if mgr == _system_manager:
+                for i, d in enumerate(distros):
+                    if d == text:
+                        window.ManagersListWidget.setCurrentRow(i)
+                        break
+                break
+
     def on_distro_click(_item):
+        global _selected_manager
+        text = _item.text()
+        _selected_manager = SIDEBAR_MANAGER_MAP.get(text)
+        if _selected_manager != _system_manager:
+            show_error("У вас нет этого пакетного менеджера")
+            select_system_distro()
+            _selected_manager = _system_manager
+            return
         query = window.SearchbarLineEdit.text().strip() or "git"
         do_search(query)
 
     def on_installed_click():
+        global _last_view, _selected_manager
+        if _selected_manager != _system_manager:
+            show_error("У вас нет этого пакетного менеджера")
+            select_system_distro()
+            _selected_manager = _system_manager
+            return
         if not pkg:
             show_error("Пакетный менеджер не определён для этого дистрибутива.")
             return
@@ -395,6 +465,8 @@ def main():
         _active_workers.append(worker)
 
         def on_results(results: list, _w=worker):
+            global _last_view
+            _last_view = "installed"
             reset_status()
             show_results(results, title="УСТАНОВЛЕННЫЕ ПАКЕТЫ", force_installed=True)
             if _w in _active_workers:
@@ -410,8 +482,14 @@ def main():
         worker.start()
 
     def on_search():
+        global _selected_manager
         query = window.SearchbarLineEdit.text().strip()
         if query:
+            if _selected_manager != _system_manager:
+                show_error("У вас нет этого пакетного менеджера")
+                select_system_distro()
+                _selected_manager = _system_manager
+                return
             do_search(query)
 
     window.ManagersListWidget.itemClicked.connect(on_distro_click)
